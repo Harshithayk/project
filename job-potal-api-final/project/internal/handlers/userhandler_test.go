@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"project/internal/middlewear"
@@ -75,6 +76,29 @@ func Test_handler_userSignin(t *testing.T) {
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   `{"ID":0,"CreatedAt":"0001-01-01T00:00:00Z","UpdatedAt":"0001-01-01T00:00:00Z","DeletedAt":null,"name":"","email":""}`,
 		},
+		{
+			name: "fail",
+			setup: func() (*gin.Context, *httptest.ResponseRecorder, services.Serviceinterface) {
+				rr := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(rr)
+				httpRequest, _ := http.NewRequest(http.MethodGet, "http://test.com:8080", strings.NewReader(`{"name":"cece",
+				"email":    "name@gmail.com",
+				"password": "hfhhfhfh"}`))
+				ctx := httpRequest.Context()
+				ctx = context.WithValue(ctx, middlewear.TraceIdKey, "123")
+				httpRequest = httpRequest.WithContext(ctx)
+				c.Request = httpRequest
+				c.Params = append(c.Params, gin.Param{Key: "id", Value: "123"})
+				mc := gomock.NewController(t)
+				ms := services.NewMockServiceinterface(mc)
+
+				ms.EXPECT().UserSignup(gomock.Any()).Return(model.User{}, errors.New("ERROR")).AnyTimes()
+
+				return c, rr, ms
+			},
+			expectedStatusCode: http.StatusBadRequest,
+			expectedResponse:   `{"msg":"user signup failed"}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -132,7 +156,30 @@ func Test_handler_userLoginin(t *testing.T) {
 			expectedStatusCode: http.StatusInternalServerError,
 			expectedResponse:   `{"msg":"invalid input"}`,
 		},
-		// TODO: Add test cases.
+		// {
+		// 	name: "success",
+		// 	setup: func() (*gin.Context, *httptest.ResponseRecorder, services.Serviceinterface) {
+		// 		rr := httptest.NewRecorder()
+		// 		c, _ := gin.CreateTestContext(rr)
+		// 		httpRequest, _ := http.NewRequest(http.MethodGet, "http://test.com", strings.NewReader(`{
+		// 		"email":    "name@gmail.com",
+		// 		"password": "hfhhfhfh"}`))
+		// 		ctx := httpRequest.Context()
+		// 		ctx = context.WithValue(ctx, middlewear.TraceIdKey, "123")
+		// 		httpRequest = httpRequest.WithContext(ctx)
+		// 		// c.Request = httpRequest
+		// 		// c.Params = append(c.Params, gin.Param{Key: "id", Value: "123"})
+		// 		// mc := gomock.NewController(t)
+		// 		// ms := services.NewMockServiceinterface(mc)
+
+		// 		// ms.EXPECT().Userlogin(gomock.Any()).Return(model.User{}, nil).AnyTimes()
+
+		// 		return c, rr, nil
+		// 	},
+		// 	expectedStatusCode: http.StatusOK,
+		// 	expectedResponse:   `{"ID":0,"CreatedAt":"0001-01-01T00:00:00Z","UpdatedAt":"0001-01-01T00:00:00Z","DeletedAt":null,"name":"","email":""}`,
+		// },
+		// // TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

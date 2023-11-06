@@ -134,7 +134,7 @@ func (h *handler) postJob(c *gin.Context) {
 
 	if err != nil {
 		log.Error().Err(err).Str("Trace Id", traceId).Msg("user signup problem")
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "user signup failed"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "Bad Request"})
 		return
 	}
 	c.JSON(http.StatusOK, us)
@@ -144,8 +144,8 @@ func (h *handler) postJob(c *gin.Context) {
 func (h *handler) getJob(c *gin.Context) {
 	ctx := c.Request.Context()
 	traceId, ok := ctx.Value(middlewear.TraceIdKey).(string)
-	id, erro := strconv.Atoi(c.Param("company_id"))
-	if erro != nil {
+	id, err := strconv.Atoi(c.Param("company_id"))
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
