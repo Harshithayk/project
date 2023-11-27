@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"fmt"
+
+	"project/config"
 	"project/internal/model"
 	"time"
 
@@ -12,7 +14,12 @@ import (
 )
 
 func Open() (*gorm.DB, error) {
-	dsn := "host=localhost user=postgres password=admin dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	//dsn := os.Getenv("DB_DSN")
+	cfg := config.GetConfig()
+	//	fmt.Println(cfg.DatabaseConfing.Password, "[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]")
+	//dsn := fmt.Sprintf("host:%s user:%s password:%s dbname:%s port:%s sslmode:%s TimeZone:%s", cfg.DatabaseConfing.Host, cfg.DatabaseConfing.User, cfg.DatabaseConfing.Password, cfg.DatabaseConfing.Dbname, cfg.DatabaseConfing.Port, cfg.DatabaseConfing.Sslmode, cfg.DatabaseConfing.TimeZone)
+	dsn := cfg.DatabaseConfing.DatabaseConfing1
+	//dsn := "host=postgres user=postgres password=admin dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
@@ -37,16 +44,7 @@ func Connection() (*gorm.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("database is not connected: %w ", err)
 	}
-	db.Migrator().DropTable(&model.User{}, &model.Company{}, &model.Job{})
-	err = db.Migrator().AutoMigrate(&model.User{})
-	if err != nil {
-		return nil, fmt.Errorf("auto migration failed: %w ", err)
-	}
-	err = db.Migrator().AutoMigrate(&model.Company{})
-	if err != nil {
-		return nil, fmt.Errorf("auto migration failed: %w ", err)
-	}
-	err = db.Migrator().AutoMigrate(&model.Job{})
+	err = db.Migrator().AutoMigrate(&model.Job{}, &model.User{}, &model.Company{})
 	if err != nil {
 		return nil, fmt.Errorf("auto migration failed: %w ", err)
 	}

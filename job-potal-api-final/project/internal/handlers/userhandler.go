@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	//"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -63,7 +64,7 @@ func (h *handler) userSignin(c *gin.Context) {
 
 }
 
-func (h *handler) userLoginin(c *gin.Context) {
+func (h *handler) userLogin(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	traceId, ok := ctx.Value(middlewear.TraceIdKey).(string)
@@ -92,7 +93,7 @@ func (h *handler) userLoginin(c *gin.Context) {
 	regClaims, err := h.us.Userlogin(userLogin)
 	if err != nil {
 		log.Error().Err(err).Msg("error in Loginin ")
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": "invalid input"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": "invalid input  USERLOGIN"})
 		return
 	}
 
@@ -105,5 +106,76 @@ func (h *handler) userLoginin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, token)
+
+}
+
+func (h *handler) forgetpassword(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	traceId, ok := ctx.Value(middlewear.TraceIdKey).(string)
+	if !ok {
+		log.Error().Str("traceId", traceId).Msg("trace id not found in forgetpassword handler")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+	var Forgotpassword model.ForgotPass
+
+	body := c.Request.Body
+	err := json.NewDecoder(body).Decode(&Forgotpassword)
+	if err != nil {
+		log.Error().Err(err).Msg("error in decoding")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(&Forgotpassword)
+	if err != nil {
+		log.Error().Err(err).Msg("error in validating ")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": "invalid input"})
+		return
+	}
+
+	_, opth, err := h.us.Forgetpassword(ctx, Forgotpassword)
+	if err != nil {
+		log.Error().Err(err).Msg("error in Loginin ")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": "invalid input  fields"})
+		return
+	}
+	c.JSON(http.StatusOK, opth)
+}
+
+func (h *handler) requestNewPassword(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	traceId, ok := ctx.Value(middlewear.TraceIdKey).(string)
+	if !ok {
+		log.Error().Str("traceId", traceId).Msg("trace id not found in forgetpassword handler")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+	var OtpModel model.Newpassword
+	body := c.Request.Body
+	err := json.NewDecoder(body).Decode(&OtpModel)
+	if err != nil {
+		log.Error().Err(err).Msg("error in decoding")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+	validate := validator.New()
+	err = validate.Struct(&OtpModel)
+	if err != nil {
+		log.Error().Err(err).Msg("error in validating ")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": "invalid input"})
+		return
+	}
+
+	opth, err := h.us.Newpassword(ctx, OtpModel)
+	if err != nil {
+		log.Error().Err(err).Msg("error in Loginin ")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": "invalid input  fields"})
+		return
+	}
+	c.JSON(http.StatusOK, opth)
 
 }

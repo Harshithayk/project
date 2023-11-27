@@ -67,7 +67,7 @@ func (h *handler) getAllCompany(c *gin.Context) {
 	us, err := h.us.GetAllCompanies()
 	if err != nil {
 		log.Error().Err(err).Str("Trace Id", traceId).Msg("user signup problem")
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "user signup failed"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "getallcomapy failed"})
 		return
 	}
 	c.JSON(http.StatusOK, us)
@@ -77,49 +77,43 @@ func (h *handler) getAllCompany(c *gin.Context) {
 func (h *handler) getCompany(c *gin.Context) {
 
 	ctx := c.Request.Context()
-	traceId, ok := ctx.Value(middlewear.TraceIdKey).(string)
-	if !ok {
-		log.Error().Str("traceId", traceId).Msg("trace id not found in handler")
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
-		return
-	}
-
-	id, erro := strconv.Atoi(c.Param("compan_id"))
+	traceId, _ := ctx.Value(middlewear.TraceIdKey).(string)
+	id, erro := strconv.Atoi(c.Param("company_id"))
 	if erro != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": http.StatusText(http.StatusBadRequest)})
+		log.Error().Str("traceId", traceId).Msg("trace id not found in userSignin handler")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": http.StatusText(http.StatusBadRequest)})
 		return
 	}
 
 	us, err := h.us.GetCompany(id)
 	if err != nil {
-		log.Error().Err(err).Str("Trace Id", traceId).Msg("get company problem")
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
+		log.Error().Err(err).Str("Trace Id", traceId).Msg("getcompany problem")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "user getcompany failed"})
 		return
 	}
 	c.JSON(http.StatusOK, us)
 }
 
-func (h *handler) postJob(c *gin.Context) {
+func (h *handler) postJobByCompany(c *gin.Context) {
 	ctx := c.Request.Context()
 	traceId, ok := ctx.Value(middlewear.TraceIdKey).(string)
 	if !ok {
-		log.Error().Str("traceId", traceId).Msg("trace id not found in userSignin handler")
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
+		log.Error().Str("traceId", traceId).Msg("trace id not found in  handler")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
 
 	id, erro := strconv.ParseUint(c.Param("company_id"), 10, 32)
-
 	if erro != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": http.StatusText(http.StatusBadRequest)})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": http.StatusText(http.StatusBadRequest)})
 		return
 	}
-	var jobCreation model.CreateJob
+	var jobCreation model.NewJobRequest
 	body := c.Request.Body
 	err := json.NewDecoder(body).Decode(&jobCreation)
 	if err != nil {
 		log.Error().Err(err).Msg("error in decoding")
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": http.StatusText(http.StatusBadRequest)})
 		return
 	}
 
@@ -127,14 +121,14 @@ func (h *handler) postJob(c *gin.Context) {
 	err = validate.Struct(&jobCreation)
 	if err != nil {
 		log.Error().Err(err).Msg("error in validating ")
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": "invalid input"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
 	us, err := h.us.JobCreate(jobCreation, id)
 
 	if err != nil {
-		log.Error().Err(err).Str("Trace Id", traceId).Msg("user signup problem")
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "Bad Request"})
+		log.Error().Err(err).Str("Trace Id", traceId).Msg("job creatuion problem in db")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
 		return
 	}
 	c.JSON(http.StatusOK, us)
@@ -144,9 +138,9 @@ func (h *handler) postJob(c *gin.Context) {
 func (h *handler) getJob(c *gin.Context) {
 	ctx := c.Request.Context()
 	traceId, ok := ctx.Value(middlewear.TraceIdKey).(string)
-	id, err := strconv.Atoi(c.Param("company_id"))
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
+	id, erro := strconv.Atoi(c.Param("company_id"))
+	if erro != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": http.StatusText(http.StatusBadRequest)})
 		return
 	}
 
@@ -157,8 +151,8 @@ func (h *handler) getJob(c *gin.Context) {
 	}
 	us, err := h.us.GetJobs(id)
 	if err != nil {
-		log.Error().Err(err).Str("Trace Id", traceId).Msg("user signup problem")
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": "user signup failed"})
+		log.Error().Err(err).Str("Trace Id", traceId).Msg("problem in getjob")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "problem in getjob"})
 		return
 	}
 	c.JSON(http.StatusOK, us)
@@ -176,10 +170,40 @@ func (h *handler) getAllJob(c *gin.Context) {
 
 	us, err := h.us.GetAllJobs()
 	if err != nil {
-		log.Error().Err(err).Str("Trace Id", traceId).Msg("user signup problem")
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "user signup failed"})
+		log.Error().Err(err).Str("Trace Id", traceId).Msg("problem in getalljob")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "problem in getalljob"})
 		return
 	}
 	c.JSON(http.StatusOK, us)
+
+}
+
+func (h *handler) processApplications(c *gin.Context) {
+	ctx := c.Request.Context()
+	traceId, ok := ctx.Value(middlewear.TraceIdKey).(string)
+	if !ok {
+		log.Error().Str("traceId", traceId).Msg("trace id not found ")
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": http.StatusText(http.StatusInternalServerError)})
+		return
+	}
+
+	var appData []model.NewUserApplication
+
+	err := json.NewDecoder(c.Request.Body).Decode(&appData)
+
+	if err != nil {
+		log.Error().Err(err).Str("trace id", traceId)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "please provide proper data"})
+		return
+	}
+
+	a, err := h.us.ProcessJobApplications(appData)
+	if err != nil {
+		log.Error().Err(err).Str("trace id", traceId)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, a)
 
 }

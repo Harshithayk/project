@@ -9,10 +9,10 @@
 package services
 
 import (
+	context "context"
 	model "project/internal/model"
 	reflect "reflect"
-
-	jwt "github.com/golang-jwt/jwt/v5"
+    jwt "github.com/golang-jwt/jwt/v5"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -115,18 +115,48 @@ func (mr *MockServiceinterfaceMockRecorder) GetJobs(id any) *gomock.Call {
 }
 
 // JobCreate mocks base method.
-func (m *MockServiceinterface) JobCreate(nj model.CreateJob, id uint64) (model.Job, error) {
+func (m *MockServiceinterface) JobCreate(newJob model.NewJobRequest, id uint64) (model.Response, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "JobCreate", nj, id)
-	ret0, _ := ret[0].(model.Job)
+	ret := m.ctrl.Call(m, "JobCreate", newJob, id)
+	ret0, _ := ret[0].(model.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // JobCreate indicates an expected call of JobCreate.
-func (mr *MockServiceinterfaceMockRecorder) JobCreate(nj, id any) *gomock.Call {
+func (mr *MockServiceinterfaceMockRecorder) JobCreate(newJob, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JobCreate", reflect.TypeOf((*MockServiceinterface)(nil).JobCreate), nj, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JobCreate", reflect.TypeOf((*MockServiceinterface)(nil).JobCreate), newJob, id)
+}
+
+// ProccessApplication mocks base method.
+func (m *MockServiceinterface) ProccessApplication(ctx context.Context, applicationData []model.NewUserApplication) ([]model.NewUserApplication, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProccessApplication", ctx, applicationData)
+	ret0, _ := ret[0].([]model.NewUserApplication)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ProccessApplication indicates an expected call of ProccessApplication.
+func (mr *MockServiceinterfaceMockRecorder) ProccessApplication(ctx, applicationData any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProccessApplication", reflect.TypeOf((*MockServiceinterface)(nil).ProccessApplication), ctx, applicationData)
+}
+
+// ProcessJobApplications mocks base method.
+func (m *MockServiceinterface) ProcessJobApplications(appData []model.NewUserApplication) ([]model.NewUserApplication, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProcessJobApplications", appData)
+	ret0, _ := ret[0].([]model.NewUserApplication)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ProcessJobApplications indicates an expected call of ProcessJobApplications.
+func (mr *MockServiceinterfaceMockRecorder) ProcessJobApplications(appData any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessJobApplications", reflect.TypeOf((*MockServiceinterface)(nil).ProcessJobApplications), appData)
 }
 
 // UserSignup mocks base method.

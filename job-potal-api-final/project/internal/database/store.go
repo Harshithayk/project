@@ -15,8 +15,8 @@ func CreateTable() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = db.Migrator().AutoMigrate(&model.User{})
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// err = db.Migrator().AutoMigrate(&model.User{})
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 }

@@ -17,7 +17,6 @@ import (
 )
 
 func Test_handler_userSignin(t *testing.T) {
-
 	tests := []struct {
 		name               string
 		setup              func() (*gin.Context, *httptest.ResponseRecorder, services.Serviceinterface)
@@ -190,7 +189,7 @@ func Test_handler_userLoginin(t *testing.T) {
 				us: ms,
 			}
 
-			h.userLoginin(c)
+			h.userLogin(c)
 			assert.Equal(t, tt.expectedStatusCode, rr.Code)
 			assert.Equal(t, tt.expectedResponse, rr.Body.String())
 		})
